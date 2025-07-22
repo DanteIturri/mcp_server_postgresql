@@ -362,9 +362,20 @@ class PgMcpServer {
       }
 
       this.connectionString = connectionString;
-      this.pgClient = new PgClient({ connectionString });
+      this.pgClient = new PgClient({
+        connectionString,
+        connectionTimeoutMillis: 5000, // 5 segundos timeout
+        query_timeout: 10000, // 10 segundos para queries
+        idle_in_transaction_session_timeout: 10000
+      });
 
-      await this.pgClient.connect();
+      // Timeout de conexión con Promise.race
+      const connectPromise = this.pgClient.connect();
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Timeout de conexión (5s)')), 5000)
+      );
+
+      await Promise.race([connectPromise, timeoutPromise]);
 
       // Probar la conexión
       const result = await this.pgClient.query('SELECT version()');

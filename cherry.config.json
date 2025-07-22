@@ -1,0 +1,12 @@
+{
+  "services": {
+    "mcp_postgresql": {
+      "command": "npx",
+      "args": ["-y", "tsx", "./src/index.ts"],
+      "env": {
+      },
+      "working_directory": "/home/dante/Documentos/mcp_server_postgresql",
+      "start_on_launch": true
+    }
+  }
+}
