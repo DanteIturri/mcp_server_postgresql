@@ -20,6 +20,7 @@ class PgMcpServer {
       {
         name: 'pg-server',
         version: '1.0.0',
+        desciption: 'Servidor MCP para interactuar con bases de datos PostgreSQL',
       },
       {
         capabilities: {
@@ -387,7 +388,6 @@ class PgMcpServer {
       );
     }
   }
-
   private async executeQuery(query: string, params?: any[]) {
     if (!this.pgClient) {
       throw new Error('No hay conexión activa. Usa connect_database primero.');
@@ -521,7 +521,6 @@ class PgMcpServer {
       );
     }
   }
-
   private async getDataTable(args: { tableName: string; limit?: number }) {
     if (!this.pgClient) {
       throw new Error('No hay conexión activa. Usa connect_database primero.');
@@ -551,7 +550,6 @@ class PgMcpServer {
       );
     }
   }
-
   private async createTable(args: {
     tableName: string;
     columns: { name: string; type: string }[];
@@ -669,8 +667,6 @@ class PgMcpServer {
       );
     }
   }
-
-
   private async updateData(args: {
     tableName: string;
     data: Record<string, any>;
@@ -722,7 +718,6 @@ class PgMcpServer {
       );
     }
   }
-
   private async deleteData(args: {
     tableName: string;
     whereClause: string;
@@ -807,7 +802,6 @@ class PgMcpServer {
       );
     }
   }
-
   private async filterData(args: { tableName: string; filter: Record<string, string> }) {
     if (!this.pgClient) {
       throw new Error('No hay conexión activa. Usa connect_database primero.');
