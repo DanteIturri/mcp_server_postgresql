@@ -219,7 +219,9 @@ class PgMcpServer {
                   type: 'array',
                   description:
                     'Valores para los parámetros en la cláusula WHERE',
-                  items: {},
+                  items: {
+                    type: 'string'
+                  },
                 },
               },
               required: ['tableName', 'data', 'whereClause', 'whereValues'],
@@ -261,7 +263,15 @@ class PgMcpServer {
                 whereClause: {
                   type: 'string',
                   description:
-                    'Condición WHERE para la eliminación (ej: "id = 1")',
+                    'Condición WHERE para la eliminación (ej: "id = $1")',
+                },
+                whereValues: {
+                  type: 'array',
+                  description:
+                    'Valores para los parámetros en la cláusula WHERE (opcional)',
+                  items: {
+                    type: 'string'
+                  },
                 },
               },
               required: ['tableName', 'whereClause'],
@@ -325,6 +335,7 @@ class PgMcpServer {
         delete_data: this.deleteData.bind(this),
         get_one_data: this.getOneData.bind(this),
         filter_data: this.filterData.bind(this),
+        upload_multiple_data: this.uploadMultipleData.bind(this),
       };
 
       try {
@@ -363,9 +374,20 @@ class PgMcpServer {
       }
 
       this.connectionString = connectionString;
-      this.pgClient = new PgClient({ connectionString });
+      this.pgClient = new PgClient({
+        connectionString,
+        connectionTimeoutMillis: 5000, // 5 segundos timeout
+        query_timeout: 10000, // 10 segundos para queries
+        idle_in_transaction_session_timeout: 10000
+      });
 
-      await this.pgClient.connect();
+      // Timeout de conexión con Promise.race
+      const connectPromise = this.pgClient.connect();
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Timeout de conexión (5s)')), 5000)
+      );
+
+      await Promise.race([connectPromise, timeoutPromise]);
 
       // Probar la conexión
       const result = await this.pgClient.query('SELECT version()');
@@ -388,9 +410,16 @@ class PgMcpServer {
       );
     }
   }
-  private async executeQuery(query: string, params?: any[]) {
+
+  private async executeQuery(args: { query: string; params?: any[] }) {
     if (!this.pgClient) {
       throw new Error('No hay conexión activa. Usa connect_database primero.');
+    }
+
+    const { query, params } = args;
+
+    if (!query) {
+      throw new Error('La consulta SQL es requerida');
     }
 
     try {
@@ -667,6 +696,62 @@ class PgMcpServer {
       );
     }
   }
+
+  private async uploadMultipleData(args: {
+    tableName: string;
+    data: Record<string, string>[];
+  }) {
+    if (!this.pgClient) {
+      throw new Error('No hay conexión activa. Usa connect_database primero.');
+    }
+
+    const { tableName, data } = args;
+
+    if (!tableName || !data || data.length === 0) {
+      throw new Error('Faltan parámetros para subir datos');
+    }
+
+    // Validar nombre de tabla
+    if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(tableName)) {
+      throw new Error('Nombre de tabla inválido');
+    }
+
+    const columns = Object.keys(data[0]);
+    const values = data.map((row) => columns.map((col) => row[col] || null));
+
+    const placeholders = values
+      .map(
+        (_, i) =>
+          `(${columns
+            .map((_, j) => `$${i * columns.length + j + 1}`)
+            .join(', ')})`
+      )
+      .join(', ');
+
+    try {
+      const query = `INSERT INTO "${tableName}" (${columns
+        .map((col) => `"${col}"`)
+        .join(', ')}) VALUES ${placeholders}`;
+      
+      const result = await this.pgClient.query(query, values.flat());
+
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `✅ ${result.rowCount} registro(s) subido(s) a ${tableName} exitosamente`,
+          },
+        ],
+      };
+    } catch (error) {
+      throw new Error(
+        `Error subiendo datos: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
+  }
+
   private async updateData(args: {
     tableName: string;
     data: Record<string, any>;
