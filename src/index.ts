@@ -425,25 +425,41 @@ class PgMcpServer {
     try {
       const result = await this.pgClient.query(query, params);
 
-      return {
+      interface QueryResult {
+        rowCount: number;
+        rows: any[];
+        fields?: Array<{
+          name: string;
+          dataTypeID: number;
+        }>;
+      }
+
+      interface QueryResponse {
+        content: Array<{
+          type: 'text';
+          text: string;
+        }>;
+      }
+
+      const queryResult: QueryResult = {
+        rowCount: result.rowCount ?? 0,
+        rows: result.rows,
+        fields: result.fields?.map((f) => ({
+          name: f.name,
+          dataTypeID: f.dataTypeID,
+        })),
+      };
+
+      const response: QueryResponse = {
         content: [
           {
             type: 'text',
-            text: JSON.stringify(
-              {
-                rowCount: result.rowCount,
-                rows: result.rows,
-                fields: result.fields?.map((f) => ({
-                  name: f.name,
-                  dataTypeID: f.dataTypeID,
-                })),
-              },
-              null,
-              2
-            ),
+            text: JSON.stringify(queryResult, null, 2),
           },
         ],
       };
+
+      return response;
     } catch (error) {
       throw new Error(
         `Error en consulta: ${
