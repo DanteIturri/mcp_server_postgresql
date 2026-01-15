@@ -1,0 +1,14 @@
+{
+  "name": "mcp-postgresql-bridge",
+  "version": "1.0.0",
+  "type": "module",
+  "bin": {
+    "mcp-postgresql-bridge": "./dist/bridge.js"
+  },
+  "scripts": {
+    "build:bridge": "tsc bridge.ts --outDir dist --module esnext --target es2020 --moduleResolution bundler"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.1"
+  }
+}
