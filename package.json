@@ -3,9 +3,11 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "tsx watch server-http.ts",
+    "dev": "tsx watch src/server-http.ts",
+    "dev:stdio": "tsx watch src/index.ts",
     "build": "tsc",
-    "start": "node dist/server-http.js"
+    "start": "node dist/server-http.js",
+    "start:stdio": "node dist/index.js"
   },
   "keywords": [],
   "author": "",

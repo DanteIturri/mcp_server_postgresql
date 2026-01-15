@@ -11,6 +11,9 @@ import {
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Confiar en el proxy (importante para HTTPS en Dockploy/Nginx)
+app.set('trust proxy', 1);
+
 // Configuración CORS
 app.use(cors({
   origin: process.env.ALLOWED_ORIGINS?.split(',') || '*',
