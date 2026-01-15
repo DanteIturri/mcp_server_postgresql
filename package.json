@@ -1,11 +1,11 @@
 {
   "name": "mcp_server_postgresql",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "tsx watch server-http.ts",
+    "build": "tsc",
+    "start": "node dist/server-http.js"
   },
   "keywords": [],
   "author": "",
@@ -13,12 +13,17 @@
   "packageManager": "pnpm@10.15.1",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.1",
+    "cors": "^2.8.5",
+    "express": "^5.2.1",
     "pg": "^8.16.0",
     "zod": "^3.25.49"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
     "@types/node": "^22.15.29",
     "@types/pg": "^8.15.4",
+    "tsx": "^4.21.0",
     "typescript": "^5.8.3"
   }
 }
