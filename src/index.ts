@@ -3,9 +3,7 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { z } from 'zod';
 import {
   CallToolRequestSchema,
-  ListResourcesRequestSchema,
   ListToolsRequestSchema,
-  ReadResourceRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
 
 import { Client as PgClient } from 'pg';
