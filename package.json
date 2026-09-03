@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "tsx watch src/server-http.ts",
+    "dev": "node api.js && tsx watch src/server-http.ts",
     "dev:stdio": "tsx watch src/index.ts",
-    "build": "tsc",
-    "start": "node dist/server-http.js",
+    "build": "node api.js && tsc",
+    "start": "node api.js && node dist/server-http.js",
     "start:stdio": "node dist/index.js"
   },
   "keywords": [],
